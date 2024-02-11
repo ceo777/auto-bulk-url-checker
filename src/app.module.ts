@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://127.0.0.1:27017/checker')],
+  imports: [MongooseModule.forRoot('mongodb://mongo:27017/checker')],
   controllers: [AppController],
   providers: [AppService],
 })
