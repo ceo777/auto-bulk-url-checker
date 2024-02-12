@@ -4,7 +4,11 @@ import { Url, UrlSchema } from './schemas/url.schema';
 import { UrlsService } from './urls.service';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Url.name, schema: UrlSchema, collection: 'urls' },
+    ]),
+  ],
   providers: [UrlsService],
 })
 export class UrlsModule {}
