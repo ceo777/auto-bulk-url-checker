@@ -1,3 +1,3 @@
-export class AddUrlDto {
+export class UrlDto {
   readonly url!: string;
 }
