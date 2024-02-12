@@ -8,15 +8,16 @@ import { UrlDto } from './dto/url.dto';
 export class UrlsService {
   constructor(@InjectModel(Url.name) private readonly urlModel: Model<Url>) {}
 
-  async add(urlDto: UrlDto): Promise<Url> {
-    return await this.urlModel.create(urlDto);
+  async add(urlDto: UrlDto): Promise<Url | null> {
+    return this.urlModel.create(urlDto);
+    // return Model.findOneAndUpdate(urlDto, urlDto, { upsert: true, new: true });
   }
 
-  async findAll(): Promise<Url[]> {
-    return this.urlModel.find().exec();
+  async findAll(): Promise<UrlDto[]> {
+    return this.urlModel.find({}, 'url').exec();
   }
 
   async delete(urlDto: UrlDto): Promise<Url | null> {
-    return await this.urlModel.findOneAndDelete(urlDto).exec();
+    return this.urlModel.findOneAndDelete(urlDto);
   }
 }

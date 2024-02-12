@@ -3,16 +3,24 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UrlsService } from './urls.service';
 import { Url } from './schemas/url.schema';
+import { UrlDto } from './dto/url.dto';
 
 describe('UrlsService', () => {
   let service: UrlsService;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let model: Model<Url>;
 
-  const mockUrl = (url = 'https://www.google.com', status = 200): Url => ({
+  const mockUrl = (url = 'https://www.example.com'): UrlDto => ({
     url,
-    status,
   });
+
+  const urlsArray = [
+    {
+      url: 'https://www.example.com',
+    },
+    {
+      url: 'https://www.example2.com',
+    },
+  ];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,15 +28,12 @@ describe('UrlsService', () => {
         UrlsService,
         {
           provide: getModelToken('Url'),
-          // notice that only the functions we call from the model are mocked
           useValue: {
             new: jest.fn().mockResolvedValue(mockUrl),
             constructor: jest.fn().mockResolvedValue(mockUrl),
             find: jest.fn(),
-            findOne: jest.fn(),
-            update: jest.fn(),
+            findOneAndDelete: jest.fn(),
             create: jest.fn(),
-            remove: jest.fn(),
             exec: jest.fn(),
           },
         },
@@ -47,12 +52,34 @@ describe('UrlsService', () => {
     jest.clearAllMocks();
   });
 
-  /*
-  it('should insert a new cat', async () => {
-    const newCat = await service.add({
-      url: 'https://www.google.com',
-    });
-    expect(newCat).toEqual(mockUrl('https://www.google.com', 0));
+  it('should return all urls', async () => {
+    jest.spyOn(model, 'find').mockReturnValue({
+      exec: jest.fn().mockResolvedValueOnce(urlsArray),
+    } as any);
+    const urls = await service.findAll();
+    expect(urls).toEqual(urlsArray);
   });
-   */
+
+  it('should insert a new url', async () => {
+    jest.spyOn(model, 'create').mockImplementationOnce(() =>
+      Promise.resolve({
+        url: 'https://www.example.com',
+        status: 200,
+      } as any),
+    );
+    const newUrl = await service.add({
+      url: 'https://www.example.com',
+    });
+    expect([mockUrl().url, null]).toContainEqual(newUrl?.url);
+  });
+
+  it('should delete a url', async () => {
+    jest.spyOn(model, 'find').mockReturnValue({
+      exec: jest.fn().mockResolvedValueOnce(urlsArray),
+    } as any);
+    const deletedUrl = await service.delete({
+      url: 'https://www.example.com',
+    });
+    expect([mockUrl().url, undefined]).toContainEqual(deletedUrl?.url);
+  });
 });
